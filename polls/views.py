@@ -3,36 +3,28 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.db.models import F
 from django.views import generic
+from django.utils import timezone
 
 from .models import Question, Choice
-
-# from time import sleep
 
 
 class IndexView(generic.ListView):
     template_name = "polls/index.html"
     context_object_name = "latest_question_list"
-    queryset = Question.objects.order_by("-pub_date")[:5]
+    queryset = Question.objects.filter(pub_date__lte=timezone.now()).order_by(
+        "-pub_date"
+    )[:5]
 
 
 class DetailView(generic.DetailView):
     model = Question
     template_name = "polls/detail.html"
+    queryset = Question.objects.filter(pub_date__lte=timezone.now())
 
 
 class ResultsView(generic.DetailView):
     model = Question
     template_name = "polls/results.html"
-
-
-def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, "polls/detail.html", {"question": question})
-
-
-def results(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, "polls/results.html", {"question": question})
 
 
 def vote(request, question_id):
